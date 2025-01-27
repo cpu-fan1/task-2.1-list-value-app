@@ -1,4 +1,5 @@
 // import logo from './logo.svg';
+// import { Error } from './Error';
 import { useState } from 'react';
 import styles from './App.module.css';
 import moment from 'moment';
@@ -8,31 +9,25 @@ function App() {
 	const [value, setValue] = useState('');
 	const [list, setList] = useState([]);
 	const [error, setError] = useState('');
-	let isValueValid = true;
+	const isValueValid = value.length >= 3;
+
+	if (!isValueValid && value !== '' && error === '') {
+		setError('Введенное значение должно содержать минимум 3 символа');
+	} else if (isValueValid && error !== '') {
+		setError('');
+	}
 
 	const onInputButtonClick = () => {
-		const promptValue = prompt('Введите значение').trim();
+		const promptValue = prompt('Введите значение')?.trim();
 		setValue(promptValue);
-		if (promptValue.length >= 3) {
-			setError('');
-		} else {
-			setError('Введенное значение должно содержать минимум 3 символа');
-		}
 	};
 
-	value.length < 3 ? (isValueValid = true) : (isValueValid = false);
-
 	const onAddButtonClick = () => {
-		if (!isValueValid) {
-			setList([...list, { id: Date.now(), value: value }]);
+		if (isValueValid) {
+			setList([...list, { id: Date.now(), value }]);
 			setValue('');
 		}
 	};
-
-	let elementExistence = 'Нет добавленных элементов';
-	if (list.length !== 0) {
-		elementExistence = '';
-	}
 
 	function getDate(date) {
 		return moment(date).locale('ru').format('LLL');
@@ -53,14 +48,16 @@ function App() {
 				<button
 					onClick={onAddButtonClick}
 					className={styles.button}
-					disabled={isValueValid}
+					disabled={!isValueValid}
 				>
 					Добавить в список
 				</button>
 			</div>
 			<div className={styles['list-container']}>
 				<h2 className={styles['list-heading']}>Список:</h2>
-				<p className={styles['no-margin-text']}>{elementExistence}</p>
+				{list.length === 0 && (
+					<p className={styles['no-margin-text']}>Нет добавленных элементов</p>
+				)}
 				<ul className={styles.list}>
 					{list.map(({ id, value }) => (
 						<li key={id}>
