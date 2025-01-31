@@ -11,20 +11,23 @@ function App() {
 	const [error, setError] = useState('');
 	const isValueValid = value.length >= 3;
 
-	if (!isValueValid && value !== '' && error === '') {
-		setError('Введенное значение должно содержать минимум 3 символа');
-	} else if (isValueValid && error !== '') {
-		setError('');
-	}
-
 	const onInputButtonClick = () => {
 		const promptValue = prompt('Введите значение')?.trim();
 		setValue(promptValue);
+
+		if (promptValue && promptValue.length < 3) {
+			setError('Введенное значение должно содержать минимум 3 символа');
+		} else {
+			setError('');
+		}
 	};
 
 	const onAddButtonClick = () => {
 		if (isValueValid) {
-			setList([...list, { id: Date.now(), value }]);
+			setList((prevList) => [
+				...prevList,
+				{ id: Date.now(), value, date: new Date() },
+			]);
 			setValue('');
 		}
 	};
@@ -55,19 +58,20 @@ function App() {
 			</div>
 			<div className={styles['list-container']}>
 				<h2 className={styles['list-heading']}>Список:</h2>
-				{list.length === 0 && (
+				{list.length ? (
+					<ul className={styles.list}>
+						{list.map(({ id, value, date }) => (
+							<li key={id}>
+								<output className={styles.date}>
+									{getDate(date)} -{' '}
+								</output>
+								{value}
+							</li>
+						))}
+					</ul>
+				) : (
 					<p className={styles['no-margin-text']}>Нет добавленных элементов</p>
 				)}
-				<ul className={styles.list}>
-					{list.map(({ id, value }) => (
-						<li key={id}>
-							<output className={styles.date}>
-								{getDate(new Date())} -{' '}
-							</output>
-							{value}
-						</li>
-					))}
-				</ul>
 			</div>
 		</div>
 	);
